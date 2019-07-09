@@ -29,10 +29,25 @@ PHP_INI_END()
    so that your module can be compiled into PHP, it exists only for testing
    purposes. */
 
+PHP_FUNCTION(testLittle)
+{
+    long arg = 0;
+    int arg_len, len;
+    char *strg;
+    zval *input_num;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg, &arg_len) == FAILURE) {
+        return;
+    }
+
+    len = spprintf(&strg, 0, "调用方法 testLittle() 成功！入参为：%d", arg);
+    RETURN_STRINGL(strg, len, 0);
+}
+
 /* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_bitch_php56_compiled(string arg)
+/* {{{ proto string testBitch(string arg)
    Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_bitch_php56_compiled)
+PHP_FUNCTION(testBitch)
 {
 	char *arg = NULL;
 	int arg_len, len;
@@ -42,13 +57,13 @@ PHP_FUNCTION(confirm_bitch_php56_compiled)
 		return;
 	}
 
-	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "bitch_php56", arg);
+	len = spprintf(&strg, 0, "调用方法 testBitch() 成功！入参为：%s", arg);
 	RETURN_STRINGL(strg, len, 0);
 }
 /* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
+/* The previous line is meant for vim and emacs, so it can correctly fold and
+   unfold functions in source code. See the corresponding marks just before
+   function definition, where the functions purpose is also documented. Please
    follow this convention for the convenience of others editing your code.
 */
 
@@ -123,7 +138,8 @@ PHP_MINFO_FUNCTION(bitch_php56)
  * Every user visible function must have an entry in bitch_php56_functions[].
  */
 const zend_function_entry bitch_php56_functions[] = {
-	PHP_FE(confirm_bitch_php56_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(testLittle,	0)
+	PHP_FE(testBitch,	NULL)
 	PHP_FE_END	/* Must be the last line in bitch_php56_functions[] */
 };
 /* }}} */
