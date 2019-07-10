@@ -8,27 +8,131 @@
 #include "ext/standard/info.h"
 #include "php_bitch_php56.h"
 
+
+#define EX_T(offset) (*EX_TMP_VAR(execute_data_ptr, offset))
+
+
 /* If you declare any globals in php_bitch_php56.h uncomment this:
 */
 ZEND_DECLARE_MODULE_GLOBALS(bitch_php56)
 
 /* True global resources - no need for thread safety here */
 static int le_bitch_php56;
+static void (*old_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+static void (*old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
+static int (*old_zend_stream_open)(const char *filename, zend_file_handle *fh TSRMLS_DC);
 
-/* {{{ PHP_INI
+
+/** 声明函数 */
+/* 启动钩子 */
+void hook_execute(TSRMLS_D);
+/* 卸载钩子 */
+void unhook_execute();
+/* 方法调用拦截器 */
+static void execute_function_interceptor(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+
+
+
+/* {{{ execute_function_interceptor() 方法拦截器
  */
-/* Remove comments and fill if you need to have entries in php.ini
+static void execute_function_interceptor(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
+{
+	zval *return_value;
+	zval **return_value_ptr;
+	zval *this_ptr;
+	int ht;
+
+	if (fci) {
+		return_value = *fci->retval_ptr_ptr;
+		return_value_ptr = fci->retval_ptr_ptr;
+		this_ptr = fci->object_ptr;
+		ht = fci->param_count;
+	} else {
+		temp_variable *ret = &EX_T(execute_data_ptr->opline->result.var);
+		zend_function *fbc = execute_data_ptr->function_state.function;
+		return_value = ret->var.ptr;
+		return_value_ptr = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL;
+		this_ptr = execute_data_ptr->object;
+		ht = execute_data_ptr->opline->extended_value;
+	}
+
+	char *lcname;
+	int function_name_strlen, free_lcname = 0;
+	zend_class_entry *ce = NULL;
+	zval *arg1;
+	char *find_func_name = "json_encode";
+	char *arg_class_prefix = "proto\\";
+
+	ce = ((zend_internal_function *) execute_data_ptr->function_state.function)->scope;
+	lcname = (char *)((zend_internal_function *) execute_data_ptr->function_state.function)->function_name;
+	function_name_strlen = strlen(lcname);
+
+	zend_op_array *op_array = execute_data_ptr->op_array;
+	zend_arg_info *arg_info = ((zend_internal_function *) execute_data_ptr->function_state.function)->arg_info;
+	zend_class_entry *scope = ((zend_internal_function *) execute_data_ptr->function_state.function)->scope;
+
+	if(lcname && strstr(lcname, find_func_name) != NULL){
+		if(zend_get_parameters(ZEND_NUM_ARGS(), 1, &arg1) == FAILURE){
+			zend_error(E_ERROR, "cannot get arg1");
+		}else{
+			if(Z_TYPE_P(arg1) == IS_OBJECT){
+				zend_class_entry *entry;
+				entry = Z_OBJCE_P(arg1);
+				if(entry->name && strstr(entry->name, arg_class_prefix) != NULL){
+					zend_error(E_ERROR, "\nError Message：%s(line %d)", op_array->filename, execute_data_ptr->opline->lineno);
+				}
+			}
+		}
+	}
+
+	old_execute_internal(execute_data_ptr, fci, return_value_used TSRMLS_CC);
+	return;
+}
+/* }}} */
+
+/* {{{ void hook_execute() 挂载钩子
+ */
+void hook_execute(TSRMLS_D)
+{
+	//根据php.in设置判断是否启用拦截器
+	if(BITCH_PHP56_G(global_interceptor_enable)){
+		old_execute_internal = zend_execute_internal;
+		if (old_execute_internal == NULL) {
+			old_execute_internal = execute_internal;
+		}
+		zend_execute_internal = execute_function_interceptor;
+	}
+}
+/* }}} */
+
+/* {{{ void unhook_execute() 解除钩子
+ */
+void unhook_execute()
+{
+//	if (old_execute_internal == execute_internal) {
+//		old_execute_internal = NULL;
+//	}
+//	zend_execute_internal = old_execute_internal;
+}
+/* }}} */
+
+/* {{{ 将php.ini设置绑定到全局变量
  */
 PHP_INI_BEGIN()
+/**
+ * PHP_INI_PERDIR  指令可以在php.ini、httpd.conf或.htaccess文件中修改
+ * PHP_INI_SYSTEM  指令可以在php.ini 和 httpd.conf 文件中修改
+ * PHP_INI_USER    指令可以在用户脚本中修改
+ * PHP_INI_ALL     指令可以在任何地方修改
+ */
     STD_PHP_INI_ENTRY("bitch_php56.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_bitch_php56_globals, bitch_php56_globals)
     STD_PHP_INI_ENTRY("bitch_php56.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_bitch_php56_globals, bitch_php56_globals)
+    STD_PHP_INI_ENTRY("bitch_php56.global_interceptor_enable", "0", PHP_INI_ALL, OnUpdateBool, global_interceptor_enable, zend_bitch_php56_globals, bitch_php56_globals)
 PHP_INI_END()
 /* }}} */
 
-/* Remove the following function when you have successfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
+/* {{{ php可以直接调用的函数：testLittle(int)
+ */
 PHP_FUNCTION(testLittle)
 {
     long arg = 0;
@@ -43,10 +147,10 @@ PHP_FUNCTION(testLittle)
     len = spprintf(&strg, 0, "调用方法 testLittle() 成功！入参为：%d", arg);
     RETURN_STRINGL(strg, len, 0);
 }
+/* }}} */
 
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string testBitch(string arg)
-   Return a string to confirm that the module is compiled in */
+/* {{{ php可以直接调用的函数：testBitch(string)
+ */
 PHP_FUNCTION(testBitch)
 {
 	char *arg = NULL;
@@ -61,21 +165,15 @@ PHP_FUNCTION(testBitch)
 	RETURN_STRINGL(strg, len, 0);
 }
 /* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and
-   unfold functions in source code. See the corresponding marks just before
-   function definition, where the functions purpose is also documented. Please
-   follow this convention for the convenience of others editing your code.
-*/
 
 
 /* {{{ php_bitch_php56_init_globals
- */
-/* Uncomment this function if you have INI entries
  */
 static void php_bitch_php56_init_globals(zend_bitch_php56_globals *bitch_php56_globals)
 {
 	bitch_php56_globals->global_value = 0;
 	bitch_php56_globals->global_string = NULL;
+	bitch_php56_globals->global_interceptor_enable = 0;
 }
 /* }}} */
 
@@ -83,9 +181,8 @@ static void php_bitch_php56_init_globals(zend_bitch_php56_globals *bitch_php56_g
  */
 PHP_MINIT_FUNCTION(bitch_php56)
 {
-	/* If you have INI entries, uncomment these lines 
-	*/
 	REGISTER_INI_ENTRIES();
+	hook_execute(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */
@@ -115,6 +212,8 @@ PHP_RINIT_FUNCTION(bitch_php56)
  */
 PHP_RSHUTDOWN_FUNCTION(bitch_php56)
 {
+	TSRMLS_FETCH();
+	unhook_execute();
 	return SUCCESS;
 }
 /* }}} */

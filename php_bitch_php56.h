@@ -26,6 +26,7 @@ extern zend_module_entry bitch_php56_module_entry;
 ZEND_BEGIN_MODULE_GLOBALS(bitch_php56)
 	long  global_value;
 	char *global_string;
+	zend_bool global_interceptor_enable;
 ZEND_END_MODULE_GLOBALS(bitch_php56)
 
 /* In every utility function you add that needs to use variables 
