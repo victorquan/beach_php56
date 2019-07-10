@@ -20,8 +20,9 @@ make install
 # 修改php.ini文件，增加以下几行配置
 [bitch_php56]
 extension=bitch_php56.so
-bitch_php56.global_value=123456
-bitch_php56.global_string=testString
+bitch_php56.global_interceptor_enable=On
+#bitch_php56.global_value=123456
+#bitch_php56.global_string=testString
 
 killall php-fpm
 ```
