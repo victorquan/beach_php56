@@ -22,6 +22,42 @@ static void (*old_execute_internal)(zend_execute_data *execute_data_ptr, zend_fc
 static void (*old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
 static int (*old_zend_stream_open)(const char *filename, zend_file_handle *fh TSRMLS_DC);
 
+/**
+ * 类全局指针
+ */
+zend_class_entry *animal_ce;
+
+/**
+ * 定义接收的参数
+ */
+ZEND_BEGIN_ARG_INFO_EX(arg_animal_get_age, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arg_animal_set_age, 0, 0, 1)
+	ZEND_ARG_INFO(0, age)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arg_animal_get_name, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arg_animal_set_name, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+/**
+ * 定义类的函数入口结构数组
+ */
+static zend_function_entry Animal_functions[] = {
+		PHP_ME(Animal, __construct, NULL,                ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
+		PHP_ME(Animal, __destruct,  NULL,                ZEND_ACC_PUBLIC|ZEND_ACC_DTOR)
+		PHP_ME(Animal, getAge,      arg_animal_get_age,  ZEND_ACC_PUBLIC)
+		PHP_ME(Animal, setAge,      arg_animal_set_age,  ZEND_ACC_PUBLIC)
+		PHP_ME(Animal, getName,     arg_animal_get_name, ZEND_ACC_PUBLIC)
+		PHP_ME(Animal, setName,     arg_animal_set_name, ZEND_ACC_PUBLIC)
+		PHP_FE_END
+};
+
+
 
 /** 声明函数 */
 /* 启动钩子 */
@@ -182,6 +218,13 @@ static void php_bitch_php56_init_globals(zend_bitch_php56_globals *bitch_php56_g
 PHP_MINIT_FUNCTION(bitch_php56)
 {
 	REGISTER_INI_ENTRIES();
+
+    zend_class_entry animal;
+    INIT_CLASS_ENTRY(animal, "Animal", Animal_functions);
+    animal_ce = zend_register_internal_class_ex(&animal, NULL, NULL TSRMLS_CC);
+	zend_declare_property_long(animal_ce, "age", sizeof("age") - 1, 0, ZEND_ACC_PRIVATE TSRMLS_CC);
+    zend_declare_property_null(animal_ce, ZEND_STRL("name"), ZEND_ACC_PRIVATE TSRMLS_CC);
+
 	hook_execute(TSRMLS_C);
 	return SUCCESS;
 }
@@ -262,6 +305,61 @@ zend_module_entry bitch_php56_module_entry = {
 #ifdef COMPILE_DL_BITCH_PHP56
 ZEND_GET_MODULE(bitch_php56)
 #endif
+
+
+
+PHP_METHOD(Animal, __construct){
+
+}
+
+PHP_METHOD(Animal, __destruct){
+
+}
+
+PHP_METHOD(Animal, getAge){
+	zval *self, *age;
+	self = getThis();
+	age = zend_read_property(animal_ce, self, "age", sizeof("age") - 1, 1 TSRMLS_CC);
+	RETURN_ZVAL(age, 1, 0);
+}
+
+PHP_METHOD(Animal, setAge){
+	zval *obj, *age;
+	obj = getThis();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &age) == FAILURE) {
+		RETURN_NULL();
+	}
+	zend_update_property_long(animal_ce, obj, "age", sizeof("age") - 1, age);
+
+	RETURN_TRUE;
+}
+
+PHP_METHOD(Animal, getName){
+	zval *self, *name;
+	self = getThis();
+	name = zend_read_property(animal_ce, self, ZEND_STRL("name"), 0 TSRMLS_CC);
+	RETURN_STRING(Z_STRVAL_P(name), 0);
+}
+
+PHP_METHOD(Animal, setName){
+	char *arg = NULL;
+	int arg_len;
+	zval *value, *self;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+	self = getThis();
+	ALLOC_INIT_ZVAL(value);
+	//MAKE_STD_ZVAL(value);
+	ZVAL_STRINGL(value, arg, arg_len, 0);
+	SEPARATE_ZVAL_TO_MAKE_IS_REF(&value);
+	zend_update_property(animal_ce, self, ZEND_STRL("name"), value TSRMLS_CC);
+
+	RETURN_TRUE;
+}
+
+
+
 
 /*
  * Local variables:

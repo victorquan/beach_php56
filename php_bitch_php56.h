@@ -45,5 +45,18 @@ ZEND_END_MODULE_GLOBALS(bitch_php56)
 #define BITCH_PHP56_G(v) (bitch_php56_globals.v)
 #endif
 
+
+/**
+ * 声明Animal类拥有的方法
+ */
+PHP_METHOD(Animal, __construct);
+PHP_METHOD(Animal, __destruct);
+PHP_METHOD(Animal, setAge);
+PHP_METHOD(Animal, getAge);
+PHP_METHOD(Animal, getName);
+PHP_METHOD(Animal, setName);
+
+
+
 #endif	/* PHP_BITCH_PHP56_H */
 
