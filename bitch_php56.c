@@ -249,11 +249,11 @@ zend_module_entry bitch_php56_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"bitch_php56",
 	bitch_php56_functions,
-	PHP_MINIT(bitch_php56),
-	PHP_MSHUTDOWN(bitch_php56),
-	PHP_RINIT(bitch_php56),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(bitch_php56),	/* Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(bitch_php56),
+	PHP_MINIT(bitch_php56),		/* module init. */
+	PHP_MSHUTDOWN(bitch_php56),	/* module shutdown. */
+	PHP_RINIT(bitch_php56),		/* request init. Replace with NULL if there's nothing to do at request start */
+	PHP_RSHUTDOWN(bitch_php56),	/* request shutdown. Replace with NULL if there's nothing to do at request end */
+	PHP_MINFO(bitch_php56),		/* module info. */
 	PHP_BITCH_PHP56_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
