@@ -28,4 +28,12 @@ killall php-fpm
 ```
 
 
+### 三、Animal类的使用
+在php代码里面，可以直接使用Animal类：
+```php
+$labrador = new \Animal();
+$labrador->setName("拉拉");
+$labrador->setAge(3);
+echo "{$labrador->getName()}今年{$labrador->getAge()}周岁了！\n";
+```
 
