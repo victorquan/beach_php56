@@ -6,18 +6,18 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_bitch_php56.h"
+#include "php_beach_php56.h"
 
 
 #define EX_T(offset) (*EX_TMP_VAR(execute_data_ptr, offset))
 
 
-/* If you declare any globals in php_bitch_php56.h uncomment this:
+/* If you declare any globals in php_beach_php56.h uncomment this:
 */
-ZEND_DECLARE_MODULE_GLOBALS(bitch_php56)
+ZEND_DECLARE_MODULE_GLOBALS(beach_php56)
 
 /* True global resources - no need for thread safety here */
-static int le_bitch_php56;
+static int le_beach_php56;
 static void (*old_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 static void (*old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
 static int (*old_zend_stream_open)(const char *filename, zend_file_handle *fh TSRMLS_DC);
@@ -131,7 +131,7 @@ static void execute_function_interceptor(zend_execute_data *execute_data_ptr, ze
 void hook_execute(TSRMLS_D)
 {
 	//根据php.in设置判断是否启用拦截器
-	if(BITCH_PHP56_G(global_interceptor_enable)){
+	if(BEACH_PHP56_G(global_interceptor_enable)){
 		old_execute_internal = zend_execute_internal;
 		if (old_execute_internal == NULL) {
 			old_execute_internal = execute_internal;
@@ -161,9 +161,9 @@ PHP_INI_BEGIN()
  * PHP_INI_USER    指令可以在用户脚本中修改
  * PHP_INI_ALL     指令可以在任何地方修改
  */
-    STD_PHP_INI_ENTRY("bitch_php56.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_bitch_php56_globals, bitch_php56_globals)
-    STD_PHP_INI_ENTRY("bitch_php56.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_bitch_php56_globals, bitch_php56_globals)
-    STD_PHP_INI_ENTRY("bitch_php56.global_interceptor_enable", "0", PHP_INI_ALL, OnUpdateBool, global_interceptor_enable, zend_bitch_php56_globals, bitch_php56_globals)
+    STD_PHP_INI_ENTRY("beach_php56.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_beach_php56_globals, beach_php56_globals)
+    STD_PHP_INI_ENTRY("beach_php56.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_beach_php56_globals, beach_php56_globals)
+    STD_PHP_INI_ENTRY("beach_php56.global_interceptor_enable", "0", PHP_INI_ALL, OnUpdateBool, global_interceptor_enable, zend_beach_php56_globals, beach_php56_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -185,9 +185,9 @@ PHP_FUNCTION(testLittle)
 }
 /* }}} */
 
-/* {{{ php可以直接调用的函数：testBitch(string)
+/* {{{ php可以直接调用的函数：testBeach(string)
  */
-PHP_FUNCTION(testBitch)
+PHP_FUNCTION(testBeach)
 {
 	char *arg = NULL;
 	int arg_len, len;
@@ -197,25 +197,25 @@ PHP_FUNCTION(testBitch)
 		return;
 	}
 
-	len = spprintf(&strg, 0, "调用方法 testBitch() 成功！入参为：%s", arg);
+	len = spprintf(&strg, 0, "调用方法 testBeach() 成功！入参为：%s", arg);
 	RETURN_STRINGL(strg, len, 0);
 }
 /* }}} */
 
 
-/* {{{ php_bitch_php56_init_globals
+/* {{{ php_beach_php56_init_globals
  */
-static void php_bitch_php56_init_globals(zend_bitch_php56_globals *bitch_php56_globals)
+static void php_beach_php56_init_globals(zend_beach_php56_globals *beach_php56_globals)
 {
-	bitch_php56_globals->global_value = 0;
-	bitch_php56_globals->global_string = NULL;
-	bitch_php56_globals->global_interceptor_enable = 0;
+	beach_php56_globals->global_value = 0;
+	beach_php56_globals->global_string = NULL;
+	beach_php56_globals->global_interceptor_enable = 0;
 }
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
-PHP_MINIT_FUNCTION(bitch_php56)
+PHP_MINIT_FUNCTION(beach_php56)
 {
 	REGISTER_INI_ENTRIES();
 
@@ -232,7 +232,7 @@ PHP_MINIT_FUNCTION(bitch_php56)
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
-PHP_MSHUTDOWN_FUNCTION(bitch_php56)
+PHP_MSHUTDOWN_FUNCTION(beach_php56)
 {
 	/* uncomment this line if you have INI entries
 	*/
@@ -244,7 +244,7 @@ PHP_MSHUTDOWN_FUNCTION(bitch_php56)
 /* Remove if there's nothing to do at request start */
 /* {{{ PHP_RINIT_FUNCTION
  */
-PHP_RINIT_FUNCTION(bitch_php56)
+PHP_RINIT_FUNCTION(beach_php56)
 {
 	return SUCCESS;
 }
@@ -253,7 +253,7 @@ PHP_RINIT_FUNCTION(bitch_php56)
 /* Remove if there's nothing to do at request end */
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
-PHP_RSHUTDOWN_FUNCTION(bitch_php56)
+PHP_RSHUTDOWN_FUNCTION(beach_php56)
 {
 	TSRMLS_FETCH();
 	unhook_execute();
@@ -263,10 +263,10 @@ PHP_RSHUTDOWN_FUNCTION(bitch_php56)
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(bitch_php56)
+PHP_MINFO_FUNCTION(beach_php56)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "bitch_php56 support", "enabled");
+	php_info_print_table_header(2, "beach_php56 support", "enabled");
 	php_info_print_table_end();
 
 	/* Remove comments if you have entries in php.ini
@@ -275,35 +275,35 @@ PHP_MINFO_FUNCTION(bitch_php56)
 }
 /* }}} */
 
-/* {{{ bitch_php56_functions[]
+/* {{{ beach_php56_functions[]
  *
- * Every user visible function must have an entry in bitch_php56_functions[].
+ * Every user visible function must have an entry in beach_php56_functions[].
  */
-const zend_function_entry bitch_php56_functions[] = {
+const zend_function_entry beach_php56_functions[] = {
 	PHP_FE(testLittle,	0)
-	PHP_FE(testBitch,	NULL)
-	PHP_FE_END	/* Must be the last line in bitch_php56_functions[] */
+	PHP_FE(testBeach,	NULL)
+	PHP_FE_END	/* Must be the last line in beach_php56_functions[] */
 };
 /* }}} */
 
-/* {{{ bitch_php56_module_entry
+/* {{{ beach_php56_module_entry
  */
-zend_module_entry bitch_php56_module_entry = {
+zend_module_entry beach_php56_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"bitch_php56",
-	bitch_php56_functions,
-	PHP_MINIT(bitch_php56),		/* module init. */
-	PHP_MSHUTDOWN(bitch_php56),	/* module shutdown. */
-	PHP_RINIT(bitch_php56),		/* request init. Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(bitch_php56),	/* request shutdown. Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(bitch_php56),		/* module info. */
-	PHP_BITCH_PHP56_VERSION,
+	"beach_php56",
+	beach_php56_functions,
+	PHP_MINIT(beach_php56),		/* module init. */
+	PHP_MSHUTDOWN(beach_php56),	/* module shutdown. */
+	PHP_RINIT(beach_php56),		/* request init. Replace with NULL if there's nothing to do at request start */
+	PHP_RSHUTDOWN(beach_php56),	/* request shutdown. Replace with NULL if there's nothing to do at request end */
+	PHP_MINFO(beach_php56),		/* module info. */
+	PHP_BEACH_PHP56_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
-#ifdef COMPILE_DL_BITCH_PHP56
-ZEND_GET_MODULE(bitch_php56)
+#ifdef COMPILE_DL_BEACH_PHP56
+ZEND_GET_MODULE(beach_php56)
 #endif
 
 

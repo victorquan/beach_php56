@@ -11,7 +11,7 @@ function testLittle($num){}
  * @param string $str
  * @return string
  */
-function testBitch($str){}
+function testBeach($str){}
 
 
 

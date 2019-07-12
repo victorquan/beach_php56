@@ -1,4 +1,4 @@
-# littleBitch
+# Beach
 
 ### 一、定位
 基于php5.6的一个so扩展，开发一套提供扩展方法、底层拦截器等功能，用于总结个人平时在做一些php技术迁移时，需要检测php运行时的一些因素，如变量属性、函数调用的运行时场景等。
@@ -7,8 +7,8 @@
 ### 二、使用方法
 执行一下命令：
 ```bash
-git clone https://github.com/victorquan/littleBitch.git
-cd littleBitch
+git clone https://github.com/victorquan/beach.git
+cd beach
 
 # root权限执行
 phpize
@@ -18,11 +18,11 @@ make install
 # make test
 
 # 修改php.ini文件，增加以下几行配置
-[bitch_php56]
-extension=bitch_php56.so
-bitch_php56.global_interceptor_enable=On
-#bitch_php56.global_value=123456
-#bitch_php56.global_string=testString
+[beach_php56]
+extension=beach_php56.so
+beach_php56.global_interceptor_enable=On
+#beach_php56.global_value=123456
+#beach_php56.global_string=testString
 
 killall php-fpm
 ```

@@ -1,10 +1,10 @@
 --TEST--
-Check for bitch_php56 presence
+Check for beach_php56 presence
 --SKIPIF--
-<?php if (!extension_loaded("bitch_php56")) print "skip"; ?>
+<?php if (!extension_loaded("beach_php56")) print "skip"; ?>
 --FILE--
 <?php 
-echo "bitch_php56 extension is available";
+echo "beach_php56 extension is available";
 /*
 	you can add regression tests for your extension here
 
@@ -18,4 +18,4 @@ echo "bitch_php56 extension is available";
 */
 ?>
 --EXPECT--
-bitch_php56 extension is available
+beach_php56 extension is available
