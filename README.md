@@ -7,7 +7,7 @@
 ### 二、使用方法
 执行一下命令：
 ```bash
-git clone https://github.com/victorquan/beach.git
+git clone https://github.com/victorquan/beach_php56.git
 cd beach
 
 # root权限执行
